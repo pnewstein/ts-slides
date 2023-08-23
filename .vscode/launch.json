@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch localhost",
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "url": "http://localhost:8001/index.html",
+            "preLaunchTask": "Ts compile",
+            "webRoot": "${workspaceFolder}"
+        }
+    ]
+}
