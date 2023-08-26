@@ -1,6 +1,8 @@
 :root {
     --bg-color: #1b1b1b;
     --emphisize-color: #505050;
+    --default-border: 2px solid #ffffff00;
+    --emphisize-boarder: 2px solid #ffffff;
 }
 
 em {
@@ -64,45 +66,34 @@ body {
     cursor: pointer;
 }
 
+#slide {
+    border: 
+    transition: border 0.5s;
+}
+
 #number {
     margin: auto;
 }
 
-#topmargin {
-    grid-column-start: 1;
-    grid-column-end: 5;
-    grid-row: 1;
-}
-#leftmargin {
-    grid-column: 1;
-    grid-row-start: 2;
-    grid-row-end: 5;
-}
-#rightmargin {
-    grid-column: 4;
-    grid-row-start: 2;
-    grid-row-end: 5;
-}
 #slider {
-    grid-column: 2;
-    grid-row: 3;
-}
-#title {
-    grid-column-start: 2;
-    grid-column-end: 4;
+    grid-column: 1;
     grid-row: 2;
 }
+#title {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row: 1;
+}
 #container {
-    grid-column: 3;
-    grid-row-start: 3;
-    grid-row-end: 5;
+    grid-column: 2;
+    grid-row-start: 2;
+    grid-row-end: 4;
 }
 #number {
-    grid-column: 2;
-    grid-row: 4;
+    grid-column: 1;
+    grid-row: 3;
 }
-#bottommargin {
-    grid-column-start: 1;
-    grid-column-end: 5;
-    grid-row: 5;
+#slide{
+    grid-column: 2;
+    grid-row: 2;
 }

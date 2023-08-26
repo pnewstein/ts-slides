@@ -68,15 +68,6 @@ function getSlider(slider: HTMLInputElement, num_slides: number): number {
   return num_slides - parseInt(number_string) - 1;
 }
 
-// function setCurrentSlideInfo() {
-//     if (slides == null) {
-//         // try again in 100 ms
-//         setTimeout(setCurrentSlideInfo, 100);
-//         return;
-//     }
-//     updateSlideInfo(slides[slide_counter]);
-// }
-
 function updateSlideInfo(
   slide_info: SlideInfo,
   container: HTMLDivElement,
@@ -109,18 +100,22 @@ function getContentPixels(grid_template: GridTemplateColumns | GridTemplateRows)
 }
 
 // Mutates the slidescreen to update the grid template
-function updateGridTemplate(slidescreen: HTMLDivElement, gtr: GridTemplateRows, gtc: GridTemplateColumns) {
-  // Convert the values of gtr and gtc to an array of strings with "px" appended
-  const gridTemplateRows = Object.values(gtr)
-    .map((value) => `${value}px`)
-    .join(' ');
-  const gridTemplateColumns = Object.values(gtc)
-    .map((value) => `${value}px`)
-    .join(' ');
+function updateGridTemplate(
+  slidescreen: HTMLDivElement,
+  slide: HTMLDivElement,
+  gtr: GridTemplateRows,
+  gtc: GridTemplateColumns,
+) {
+  const slidescreen_template_rows = `${gtr.top_margin}px ${sumArray(getContentPixels(gtr))}px ${gtr.bottom_margin}px`;
+  const slidescreen_template_columns = `${gtc.right_margin}px ${sumArray(getContentPixels(gtc))}px ${
+    gtc.left_margin
+  }px`;
 
   // Apply the grid template to the slidescreen element
-  slidescreen.style.gridTemplateRows = gridTemplateRows;
-  slidescreen.style.gridTemplateColumns = gridTemplateColumns;
+  slidescreen.style.gridTemplateRows = slidescreen_template_rows;
+  slidescreen.style.gridTemplateColumns = slidescreen_template_columns;
+  slide.style.gridTemplateRows = `${gtr.title}px ${gtr.slider}px ${gtr.number}px`;
+  slide.style.gridTemplateColumns = `${gtc.slider}px ${gtc.content}px`;
 }
 
 function getGridTemplate(
@@ -160,6 +155,7 @@ function updateSlideDimention(
   slide_screen: HTMLDivElement,
   title: HTMLDivElement,
   number: HTMLDivElement,
+  slide: HTMLDivElement,
   slide_height: number | null,
   slide_width: number | null,
   x_shift: number,
@@ -184,7 +180,7 @@ function updateSlideDimention(
   // Handle grid template
   const gtc = getGridTemplate('GridTemplateColumns', x_shift, screen_width, out_width) as GridTemplateColumns;
   const gtr = getGridTemplate('GridTemplateRows', y_shift, screen_height, out_height) as GridTemplateRows;
-  updateGridTemplate(slide_screen, gtr, gtc);
+  updateGridTemplate(slide_screen, slide, gtr, gtc);
   // handle title text
   const title_size = (gtr.title * TITLE_TEXT_RATIO).toString() + 'px';
   title.style.fontSize = title_size;
@@ -196,6 +192,7 @@ function updateSlideDimention(
 }
 
 function initHtml(): {
+  slide: HTMLDivElement;
   slidescreen: HTMLDivElement;
   title: HTMLDivElement;
   slider: HTMLInputElement;
@@ -204,12 +201,8 @@ function initHtml(): {
 } {
   const slidescreen = document.createElement('div');
   slidescreen.id = 'slidescreen';
-  const top_margin = document.createElement('div');
-  top_margin.id = 'topmargin';
-  const left_margin = document.createElement('div');
-  left_margin.id = 'leftmargin';
-  const right_margin = document.createElement('div');
-  right_margin.id = 'rightmargin';
+  const slide = document.createElement('div');
+  slide.id = 'slide';
   const slider = document.createElement('input');
   slider.id = 'slider';
   slider.type = 'range';
@@ -221,11 +214,12 @@ function initHtml(): {
   container.id = 'container';
   const number = document.createElement('div');
   number.id = 'number';
-  const bottom_margin = document.createElement('div');
-  bottom_margin.id = 'bottommargin';
+  slide.style.display = 'grid';
+  slide.append(title, slider, container, number);
   slidescreen.style.display = 'grid';
-  slidescreen.append(title, slider, container, number);
+  slidescreen.append(slide);
   return {
+    slide: slide,
     slidescreen: slidescreen,
     title: title,
     slider: slider,
@@ -244,22 +238,21 @@ function incrementSlide(
   const new_slide_num = slide_num + direction;
   if (new_slide_num < 0 || new_slide_num == slides.length) {
     //  you are at the first or last slide
-    const bg_color = getComputedStyle(slider).getPropertyValue('background').trim();
+    const bg_color = getComputedStyle(slider).getPropertyValue('--bg-color').trim();
     const emph_color = getComputedStyle(slider).getPropertyValue('--emphisize-color').trim();
     slider.style.background = emph_color;
-    setTimeout(() => (slider.style.background = bg_color), 100);
+    setTimeout(() => (slider.style.background = bg_color), 200);
     return { slide_num: slide_num, slide_info: slides[slide_num] };
   }
   setSlider(slider, new_slide_num, slides.length);
   return { slide_num: new_slide_num, slide_info: slides[new_slide_num] };
 }
 
-function flashOutline(slidescreen: HTMLDivElement) {
-  for (const child of slidescreen.children) {
-    const typed_child = child as HTMLElement;
-    typed_child.style.outline = '5px solid white';
-    setTimeout(() => ((typed_child.style.outline = ''), 200));
-  }
+function flashOutline(slide: HTMLDivElement) {
+  const df_border = getComputedStyle(slide).getPropertyValue('--default-border').trim();
+  const emph_border = getComputedStyle(slide).getPropertyValue('--emphisize-boarder').trim();
+  slide.style.border = emph_border;
+  setTimeout(() => (slide.style.border = df_border), 500);
 }
 
 function tryToWidenScreen(
@@ -270,16 +263,17 @@ function tryToWidenScreen(
   slide_height: number,
   slide_width: number,
   slidescreen: HTMLDivElement,
+  slide: HTMLDivElement,
   title: HTMLDivElement,
   number: HTMLDivElement,
 ): { y_shift: number; x_shift: number; slide_height: number; slide_width: number } {
-  flashOutline(slidescreen);
+  flashOutline(slide);
   y_shift += y_shift_amount;
   slide_height += 2 * Math.abs(y_shift_amount);
   x_shift += x_shift_amount;
   slide_width += 2 * Math.abs(x_shift_amount);
   try {
-    updateSlideDimention(slidescreen, title, number, slide_height, slide_width, x_shift, y_shift);
+    updateSlideDimention(slidescreen, title, number, slide, slide_height, slide_width, x_shift, y_shift);
   } catch (error) {
     if (!(error instanceof NegitiveMarginError)) {
       throw error;
@@ -306,15 +300,16 @@ function narrowScreen(
   slide_height: number,
   slide_width: number,
   slidescreen: HTMLDivElement,
+  slide: HTMLDivElement,
   title: HTMLDivElement,
   number: HTMLDivElement,
 ): { y_shift: number; x_shift: number; slide_height: number; slide_width: number } {
-  flashOutline(slidescreen);
+  flashOutline(slide);
   y_shift += y_shift_amount;
   slide_height += -2 * Math.abs(y_shift_amount);
   x_shift += x_shift_amount;
   slide_width += -2 * Math.abs(x_shift_amount);
-  updateSlideDimention(slidescreen, title, number, slide_height, slide_width, x_shift, y_shift);
+  updateSlideDimention(slidescreen, title, number, slide, slide_height, slide_width, x_shift, y_shift);
   return {
     y_shift: y_shift,
     x_shift: x_shift,
@@ -333,7 +328,16 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
   var slide_info: SlideInfo; // the current info displayed on the slide
   // make the HTML
   const html = initHtml();
-  ({ slide_height, slide_width } = updateSlideDimention(html.slidescreen, html.title, html.number, null, null, 0, 0));
+  ({ slide_height, slide_width } = updateSlideDimention(
+    html.slidescreen,
+    html.title,
+    html.number,
+    html.slide,
+    null,
+    null,
+    0,
+    0,
+  ));
   // put the information on the slide
   var slide_info = slides[slide_num];
   updateSlideInfo(slide_info, html.container, html.title, html.number);
@@ -354,6 +358,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           html.slidescreen,
           html.title,
           html.number,
+          html.slide,
           null,
           null,
           0,
@@ -380,6 +385,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -393,6 +399,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -406,6 +413,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -419,6 +427,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -432,6 +441,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -445,6 +455,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -458,6 +469,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -471,6 +483,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           slide_height,
           slide_width,
           html.slidescreen,
+          html.slide,
           html.title,
           html.number,
         ));
@@ -484,6 +497,7 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
                 html.slidescreen,
                 html.title,
                 html.number,
+                html.slide,
                 null,
                 null,
                 0,
