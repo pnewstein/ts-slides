@@ -1,0 +1,7 @@
+/.prettierrc
+*.png
+/package-lock.json
+/slides.js
+*.map
+/slides.json
+/node_modules/

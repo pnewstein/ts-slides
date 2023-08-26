@@ -4,7 +4,7 @@
         {
             "label": "Ts compile",
             "type": "shell",
-            "command": "tsc slides.ts --sourceMap",
+            "command": "npx prettier --write \"**/*.ts\" && tsc",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
