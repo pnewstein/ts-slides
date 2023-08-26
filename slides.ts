@@ -184,7 +184,6 @@ function updateSlideDimention(
   // Handle grid template
   const gtc = getGridTemplate('GridTemplateColumns', x_shift, screen_width, out_width) as GridTemplateColumns;
   const gtr = getGridTemplate('GridTemplateRows', y_shift, screen_height, out_height) as GridTemplateRows;
-  console.log(gtr);
   updateGridTemplate(slide_screen, gtr, gtc);
   // handle title text
   const title_size = (gtr.title * TITLE_TEXT_RATIO).toString() + 'px';
@@ -225,7 +224,7 @@ function initHtml(): {
   const bottom_margin = document.createElement('div');
   bottom_margin.id = 'bottommargin';
   slidescreen.style.display = 'grid';
-  slidescreen.append(top_margin, right_margin, title, slider, container, number, bottom_margin);
+  slidescreen.append(title, slider, container, number);
   return {
     slidescreen: slidescreen,
     title: title,
@@ -245,11 +244,22 @@ function incrementSlide(
   const new_slide_num = slide_num + direction;
   if (new_slide_num < 0 || new_slide_num == slides.length) {
     //  you are at the first or last slide
-    // TODO fancy animation here maybe the hover animation
+    const bg_color = getComputedStyle(slider).getPropertyValue('background').trim();
+    const emph_color = getComputedStyle(slider).getPropertyValue('--emphisize-color').trim();
+    slider.style.background = emph_color;
+    setTimeout(() => (slider.style.background = bg_color), 100);
     return { slide_num: slide_num, slide_info: slides[slide_num] };
   }
   setSlider(slider, new_slide_num, slides.length);
   return { slide_num: new_slide_num, slide_info: slides[new_slide_num] };
+}
+
+function flashOutline(slidescreen: HTMLDivElement) {
+  for (const child of slidescreen.children) {
+    const typed_child = child as HTMLElement;
+    typed_child.style.outline = '5px solid white';
+    setTimeout(() => ((typed_child.style.outline = ''), 200));
+  }
 }
 
 function tryToWidenScreen(
@@ -263,6 +273,7 @@ function tryToWidenScreen(
   title: HTMLDivElement,
   number: HTMLDivElement,
 ): { y_shift: number; x_shift: number; slide_height: number; slide_width: number } {
+  flashOutline(slidescreen);
   y_shift += y_shift_amount;
   slide_height += 2 * Math.abs(y_shift_amount);
   x_shift += x_shift_amount;
@@ -286,6 +297,7 @@ function tryToWidenScreen(
     slide_width: slide_width,
   };
 }
+
 function narrowScreen(
   y_shift_amount: number,
   x_shift_amount: number,
@@ -297,6 +309,7 @@ function narrowScreen(
   title: HTMLDivElement,
   number: HTMLDivElement,
 ): { y_shift: number; x_shift: number; slide_height: number; slide_width: number } {
+  flashOutline(slidescreen);
   y_shift += y_shift_amount;
   slide_height += -2 * Math.abs(y_shift_amount);
   x_shift += x_shift_amount;
@@ -479,7 +492,6 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
           );
         break;
       case 'r':
-        console.log('r');
         html.slidescreen.remove();
         document.removeEventListener('keydown', keyHandeler);
         initPresentation(slides, slide_num);

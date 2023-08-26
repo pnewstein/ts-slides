@@ -1,5 +1,6 @@
 :root {
-    --bg-color: #1b1b1b
+    --bg-color: #1b1b1b;
+    --emphisize-color: #505050;
 }
 
 em {
@@ -31,8 +32,6 @@ body {
     background-color: var(--bg-color);
 }
 
-
-
 #slider {
     appearance: none;
     writing-mode: bt-lr;
@@ -46,7 +45,7 @@ body {
 }
 
 #slider:hover {
-    background: #505050;
+    background: var(--emphisize-color);
 }
 
 #slider::-webkit-slider-thumb {
