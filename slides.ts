@@ -167,11 +167,11 @@ function updateSlideDimention(
   if (slide_height == null || slide_width == null) {
     if (screen_height * ASPECT_RATIO > screen_width) {
       // height is too long. use width
-      out_width = screen_width;
-      out_height = screen_width / ASPECT_RATIO;
+      out_width = screen_width - 8; // add a 4 px buffer
+      out_height = screen_width / ASPECT_RATIO - 8;
     } else {
-      out_width = screen_height * ASPECT_RATIO;
-      out_height = screen_height;
+      out_width = screen_height * ASPECT_RATIO - 8;
+      out_height = screen_height - 8;
     }
   } else {
     out_height = slide_height;
