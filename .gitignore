@@ -5,3 +5,4 @@
 *.map
 /slides.json
 /node_modules/
+*.webm

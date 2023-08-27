@@ -1,6 +1,4 @@
 interface Video {
-  row_dim: number;
-  col_dim: number;
   path: string;
   kind: 'Video';
 }
@@ -80,7 +78,7 @@ function updateSlideInfo(
       html = `<img src=${slide_info.content.path}>`;
       break;
     case 'Video':
-      html = `<video width=${slide_info.content.row_dim}`;
+      html = `<video controls autoplay><source src=${slide_info.content.path}> type="video/webm"></video>`;
       break;
   }
   container.innerHTML = html;
