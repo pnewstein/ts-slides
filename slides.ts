@@ -163,7 +163,7 @@ function updateSlideDimention(
 ): { slide_height: number; slide_width: number } {
   const screen_height = window.innerHeight;
   const screen_width = window.innerWidth;
-  var out_height: number, out_width: number;
+  let out_height: number, out_width: number;
   if (slide_height == null || slide_width == null) {
     if (screen_height * ASPECT_RATIO > screen_width) {
       // height is too long. use width
@@ -320,12 +320,12 @@ function narrowScreen(
 
 function initPresentation(slides: SlideInfo[], slide_num: number) {
   // state variables
-  var slide_num: number; // Current point int the presentation
-  var y_shift = 0; // how far down to shift the viewer
-  var x_shift = 0; // how far left to shift the viewer
-  var slide_height: number;
-  var slide_width: number;
-  var slide_info: SlideInfo; // the current info displayed on the slide
+  // slide_num: Current point int the presentation
+  let y_shift = 0; // how far down to shift the viewer
+  let x_shift = 0; // how far left to shift the viewer
+  let slide_height: number;
+  let slide_width: number;
+  let slide_info = slides[slide_num]; // the current info displayed on the slide
   // make the HTML
   const html = initHtml();
   ({ slide_height, slide_width } = updateSlideDimention(
@@ -339,7 +339,6 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
     0,
   ));
   // put the information on the slide
-  var slide_info = slides[slide_num];
   updateSlideInfo(slide_info, html.container, html.title, html.number);
   html.slider.max = (slides.length - 1).toString();
   setSlider(html.slider, slide_num, slides.length);

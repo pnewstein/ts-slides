@@ -23,6 +23,7 @@ body {
     color: #dddddd;
     object-fit: cover;
     overflow: hidden;
+    font-family: sans-serif;
 }
 
 #title {
