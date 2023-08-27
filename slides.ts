@@ -318,9 +318,10 @@ function narrowScreen(
   };
 }
 
-function initPresentation(slides: SlideInfo[], slide_num: number) {
+function initPresentation(slides: SlideInfo[], slide_num: number, is_fullscreen: boolean) {
   // state variables
   // slide_num: Current point int the presentation
+  // slide_num: is fullscreen?
   let y_shift = 0; // how far down to shift the viewer
   let x_shift = 0; // how far left to shift the viewer
   let slide_height: number;
@@ -349,6 +350,25 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
     slide_info = slides[slide_num];
     updateSlideInfo(slide_info, html.container, html.title, html.number);
   });
+  // set fullscreen
+  if (is_fullscreen) {
+    html.slidescreen
+      .requestFullscreen()
+      .then(
+        () =>
+          ({ slide_height, slide_width } = updateSlideDimention(
+            html.slidescreen,
+            html.title,
+            html.number,
+            html.slide,
+            null,
+            null,
+            0,
+            0,
+          )),
+      );
+  }
+
   // keybindings
   function keyHandeler(event: KeyboardEvent) {
     switch (event.key) {
@@ -488,26 +508,45 @@ function initPresentation(slides: SlideInfo[], slide_num: number) {
         ));
         break;
       case 'f':
-        html.slidescreen
-          .requestFullscreen()
-          .then(
-            () =>
-              ({ slide_height, slide_width } = updateSlideDimention(
-                html.slidescreen,
-                html.title,
-                html.number,
-                html.slide,
-                null,
-                null,
-                0,
-                0,
-              )),
-          );
+        if (is_fullscreen) {
+          document
+            .exitFullscreen()
+            .then(
+              () =>
+                ({ slide_height, slide_width } = updateSlideDimention(
+                  html.slidescreen,
+                  html.title,
+                  html.number,
+                  html.slide,
+                  null,
+                  null,
+                  0,
+                  0,
+                )),
+            );
+        } else {
+          html.slidescreen
+            .requestFullscreen()
+            .then(
+              () =>
+                ({ slide_height, slide_width } = updateSlideDimention(
+                  html.slidescreen,
+                  html.title,
+                  html.number,
+                  html.slide,
+                  null,
+                  null,
+                  0,
+                  0,
+                )),
+            );
+        }
+        is_fullscreen = !is_fullscreen;
         break;
       case 'r':
         html.slidescreen.remove();
         document.removeEventListener('keydown', keyHandeler);
-        initPresentation(slides, slide_num);
+        initPresentation(slides, slide_num, is_fullscreen);
         break;
       default:
         break;
@@ -523,5 +562,5 @@ async function loadSlidesfromJson() {
 }
 
 loadSlidesfromJson().then((slide_infos) => {
-  initPresentation(slide_infos, 0);
+  initPresentation(slide_infos, 0, false);
 });
